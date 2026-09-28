@@ -11,22 +11,33 @@ Emífono es un intercomunicador analógico de dos nodos diseñado para transmiti
 
 El diseño parte de una señal de micrófono de baja amplitud y la acondiciona mediante una arquitectura de amplificación en cascada. La primera etapa realiza la amplificación de voltaje y la etapa de salida utiliza un par Darlington para proporcionar el acople de impedancias y la corriente necesaria para la carga.
 
+## Datos principales del proyecto
+
+| Parámetro | Dato reportado |
+|---|---:|
+| Alimentación | 9 V |
+| Micrófono | Electret |
+| Tensión de operación del micrófono | 2.02 V |
+| Corriente de polarización | 0.2 mA |
+| Impedancia de salida del micrófono | 4.85 kΩ |
+| Banda de voz | 300 Hz – 3.4 kHz |
+| Preamplificación base | ≈ ×10 |
+| Carga | 8 Ω |
+| Potencia calculada al parlante | ≈ 176 mW |
+| Entrada usada en simulaciones | 20 mVpp, 1 kHz |
+
 ## Características
 
 - Intercomunicador de **dos nodos** con canal físico compartido.
 - Micrófono **electret** caracterizado experimentalmente.
 - Preamplificación mediante **BJT en emisor común**.
-- Ganancia de preamplificación del orden de **×10**.
 - Filtros RC pasivos para acondicionar la banda de voz.
-- Banda de trabajo aproximada de **300 Hz a 3.4 kHz**.
 - Etapa de salida basada en **par Darlington**.
-- Carga de salida: **8 Ω**.
-- Potencia calculada de aproximadamente **176 mW**, superior al mínimo requerido de 0.125 W.
-- Selección del nodo transmisor mediante **pulsador mecánico**.
-- **Vúmetro analógico** implementado con BJT y LEDs.
-- Control de volumen mediante **potenciómetro logarítmico de 22 kΩ**.
+- Selección del nodo transmisor mediante **pulsador**.
+- **Vúmetro/indicador de sobrecarga** con BJT y LEDs.
+- Control de volumen mediante **potenciómetro logarítmico**.
 - Segundo dispositivo con efecto de voz tipo **Fuzz** mediante saturación deliberada de una etapa BJT.
-- Simulación de las etapas mediante **LTspice**.
+- Simulación en **LTspice**.
 
 ## Arquitectura
 
@@ -51,49 +62,59 @@ Micrófono 1 ──> Preamplificador ──> Filtro ──┐
 Micrófono 2 ──> Preamplificador ──> Filtro ──┘
 ```
 
-El pulsador selecciona qué señal llega al canal compartido, evitando la superposición simultánea de las dos transmisiones.
+El pulsador selecciona qué señal llega al canal compartido.
 
-## Etapas de diseño
+## Diseño y resultados
 
-### Caracterización del micrófono
+### 1. Micrófono electret
 
-Se caracterizó experimentalmente un micrófono electret comercial. Se obtuvo una corriente de polarización cercana a **0.2 mA** y una impedancia de salida aproximada de **4.85 kΩ**.
+El micrófono adquirido no tenía una referencia identificable, por lo que se caracterizó experimentalmente. El informe registra 2.02 V de operación, 0.2 mA de corriente de polarización y aproximadamente 4.85 kΩ de impedancia de salida.
 
-### Preamplificación
+### 2. Preamplificador
 
-Se evaluaron las configuraciones fundamentales del BJT y se seleccionó el **emisor común sin bypass** para la etapa de ganancia de voltaje.
+Se evaluaron las configuraciones fundamentales del BJT y se seleccionó el **emisor común sin bypass** para la amplificación de voltaje. El diseño base reporta aproximadamente:
 
-### Filtrado
+- (R_C=2.4,kΩ)
+- (R_E=220,Ω)
+- (I_C=1.264,mA)
+- (A_v≈-9.98,V/V)
+- (Z_{in}≈6.5,kΩ)
+- (Z_{out}=2.4,kΩ)
 
-Se implementaron filtros RC pasivos:
+### 3. Filtrado
 
-- Pasa-altos: aproximadamente **300 Hz**.
-- Pasa-bajos: aproximadamente **3.4 kHz**.
+La señal se acondiciona mediante filtros RC pasivos con una banda de trabajo aproximada de **300 Hz a 3.4 kHz**.
 
-### Amplificación de potencia
+### 4. Salida de potencia
 
-Se seleccionó un **par Darlington** por su elevada ganancia de corriente, alta impedancia de entrada y baja impedancia de salida. El análisis del diseño reporta aproximadamente **176 mW** sobre la carga de 8 Ω.
+El par Darlington adapta la impedancia hacia el parlante de 8 Ω. El cálculo reportado da una potencia aproximada de **176 mW**, superior al mínimo requerido de 0.125 W.
 
-### Canal compartido
+### 5. Dispositivo 1
 
-Los dos nodos utilizan un único canal de transmisión. Un pulsador mecánico selecciona cuál de las señales es enviada al canal.
+El primer dispositivo incorpora control de volumen y un vúmetro/indicador de sobrecarga. La etapa adicional de amplificación se calculó con (A_v≈-19.27), (Z_{in}≈7.77,kΩ) y (Z_{out}≈3.3,kΩ).
 
-### Módulos adicionales
+En la simulación con 20 mVpp a 1 kHz, el informe reporta una ganancia práctica máxima de aproximadamente **7.49 V/V** debido a la limitación del potenciómetro.
 
-- Vúmetro analógico con BJT y LEDs.
-- Control de volumen logarítmico.
-- Efecto Fuzz mediante saturación deliberada.
-- Alimentación externa y punto medio virtual de polarización.
+### 6. Dispositivo 2 — Fuzz
 
-## Simulación
+El segundo dispositivo incorpora un bloque Fuzz basado en saturación intencional de una etapa BJT. El informe reporta aproximadamente (V_{CE}=1.645,V) para Q12 y una ganancia calculada de (-29.27,V/V) antes de considerar el recorte no lineal.
 
-Las simulaciones se realizaron en LTspice para estudiar las diferentes etapas. El análisis incluye el comportamiento del vúmetro como indicador de sobrecarga y el recorte de la señal producido por el bloque Fuzz.
+Después del Fuzz se añadió un atenuador fijo de 2 kΩ/47 kΩ (≈ −27.4 dB), y la preamplificación del dispositivo 2 se ajustó a aproximadamente **−14.13 V/V**.
+
+### 7. Evidencia visual del informe
+
+Las figuras del informe se conservaron como fuente de evidencia para los esquemas, modelos, gráficas y resultados. Consulta:
+
+- [Índice de figuras](docs/figure-index.md)
+- [Datos y mediciones](docs/measurements.md)
+- [Notas de diseño](docs/design-notes.md)
+- [Resultados de simulación](docs/simulation.md)
+
+El informe original contiene las figuras numeradas 1–39, incluyendo los circuitos, modelos de Fuzz, esquemas completos, gráficas del vúmetro y la salida del Fuzz.
 
 ## Construcción y aprendizajes
 
-Durante la construcción física se identificaron diferencias entre el modelo ideal y el circuito real, incluyendo la influencia de tolerancias sobre el punto Q, ruido asociado a determinadas configuraciones de bypass y la necesidad de utilizar resistencias con potencia nominal suficiente.
-
-También se comprobó la importancia de verificar los datasheets y la distribución física de pines antes del montaje.
+La bitácora registra problemas reales de montaje: ruido asociado a algunas configuraciones de bypass, necesidad de añadir resistencias para estabilizar el punto de operación, una resistencia que se quemó por una selección insuficiente de potencia y la importancia de verificar los pinouts de los componentes antes del montaje.
 
 ## Estructura
 
@@ -102,20 +123,15 @@ emifonoIntercomunicador/
 ├── README.md
 ├── .gitignore
 ├── docs/
+│   ├── design-notes.md
+│   ├── measurements.md
+│   ├── simulation.md
+│   └── figure-index.md
 ├── schematics/
-│   ├── canal-1/
-│   ├── canal-2/
-│   └── sistema-completo/
 ├── simulation/
-│   ├── canal-1/
-│   ├── canal-2/
-│   └── fuzz/
 ├── pcb/
 ├── measurements/
 └── images/
-    ├── prototype/
-    ├── schematics/
-    └── results/
 ```
 
 ## Autores
