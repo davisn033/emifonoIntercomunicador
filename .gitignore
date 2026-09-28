@@ -1,0 +1,21 @@
+# LTspice
+*.raw
+*.log
+*.net
+*.op.raw
+*.fft
+*.fra
+*.ac.raw
+*.noise.raw
+*.tran.raw
+
+# Temporary files
+*.bak
+*.tmp
+*.swp
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
